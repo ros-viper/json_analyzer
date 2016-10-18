@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>High Charts</title>
+</head>
+
+<body>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+    <div class="container">
+        <div>
+            <select id="list">
+                {% for year in years %}
+                    <option {% if loop.index0 == 0 %}selected=yes {% endif %}>{{year}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="container" style="width:100%; height:400px;"></div>
+            
+        <script>
+            $(document).ready(function () {
+
+                var myChart = Highcharts.chart('container', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Фрукты'
+                    },
+                    xAxis: {
+                        categories: [
+                        {% for i in first_fruits %}
+                            {% for key, value in i.items() %}
+                                '{{key}}',
+                            {% endfor %}
+                        {% endfor %}
+                        ]
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Килограммы'
+                        }
+                    },
+                    series: [{
+                        name: '{{first_year}}',                
+                        data: [
+                        {% for i in first_fruits %}
+                            {% for key, value in i.items() %}
+                                {{value}},
+                            {% endfor %}
+                        {% endfor %}
+                        ]
+                    }]
+                });
+                $("#list").on('change', function() {
+                    var selVal = $(this).val();
+                    var data = {{data|safe}};
+
+                    var numbers = [];
+                    var fruits = [];
+
+                    for (var k in data) {
+                        if (k == selVal) {
+                            for (var i in data[k]) {
+                                for (var e in data[k][i]) {
+                                    numbers.push(parseInt(data[k][i][e]));
+                                    fruits.push(e);
+                                }
+                            }
+                        }
+                    };
+                    myChart.xAxis[0].setCategories(fruits, false);
+                    myChart.series[0].remove();
+                    myChart.addSeries({
+                        name: selVal,
+                        data: numbers,
+                        color: 'skyblue',
+                    });
+                });
+            });   
+
+        </script>
+    </div>
+</body>
+</html>
